@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cycle. — Réveille-toi au bon moment</title>
+<meta name="description" content="Calcule ton réveil idéal selon tes cycles de sommeil. Essai gratuit 7 jours, puis 2€/mois.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F4EF;
+    --ink:#10180F;
+    --moss-deep:#0E2A1F;
+    --solar:#F4510B;
+    --solar-soft:#FF7A3D;
+    --mist:rgba(16,24,15,.12);
+    --mist-strong:rgba(16,24,15,.55);
+    --sage:#DCE4D4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:600px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;line-height:1.1;letter-spacing:-.02em;font-weight:600}
+  a{color:inherit;text-decoration:none}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--solar);font-weight:500}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(244,244,239,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--mist)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px}
+  .brand .dot{color:var(--solar)}
+  .btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);padding:12px 24px;border-radius:100px;font-weight:600;font-size:14.5px;transition:background .25s ease,transform .25s ease;border:none;cursor:pointer}
+  .btn:hover{background:var(--solar);transform:translateY(-2px)}
+  .nav .btn{padding:9px 18px;font-size:13.5px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 0 0}
+  .hero h1{font-size:clamp(34px,8vw,46px);margin:18px 0 18px}
+  .hero h1 em{font-style:normal;color:var(--solar)}
+  .hero .lead{font-size:17px;color:var(--mist-strong);margin-bottom:28px;max-width:440px}
+  .hero-cta{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:48px}
+  .hero-sub{font-size:13px;color:var(--mist-strong)}
+  .hero-sub b{color:var(--ink);font-weight:600}
+
+  /* ---------- preview card ---------- */
+  .preview-wrap{margin-bottom:8px}
+  .preview{background:var(--moss-deep);color:var(--paper);border-radius:22px;padding:32px 28px;text-align:center;position:relative;overflow:hidden;box-shadow:0 24px 60px -30px rgba(14,42,31,.5)}
+  .preview::after{content:"";position:absolute;right:-110px;top:-120px;width:280px;height:280px;background:radial-gradient(circle,rgba(244,81,11,.24),transparent 65%);pointer-events:none}
+  .preview-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,244,239,.55);position:relative;z-index:1}
+  .preview-time{font-family:'Bricolage Grotesque',sans-serif;font-size:4rem;font-weight:600;color:var(--solar-soft);line-height:1.1;margin:8px 0;position:relative;z-index:1}
+  .preview-detail{font-size:14px;color:rgba(244,244,239,.7);position:relative;z-index:1;margin-bottom:20px}
+  .preview-curve{position:relative;z-index:1;height:54px;margin-bottom:18px}
+  .preview-curve svg{width:100%;height:100%}
+  .preview-dots{display:flex;justify-content:center;gap:8px;position:relative;z-index:1}
+  .pdot{width:12px;height:12px;border-radius:50%;background:rgba(244,244,239,.15);border:1.5px solid rgba(244,244,239,.35)}
+  .pdot.final{background:var(--solar);border-color:var(--solar);animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(244,81,11,.4)}50%{box-shadow:0 0 0 8px rgba(244,81,11,0)}}
+
+  /* ---------- sections ---------- */
+  section{padding:64px 0}
+  .section-head{margin-bottom:32px}
+  .section-head h2{font-size:clamp(26px,6vw,36px);margin:12px 0 12px}
+  .section-head p{color:var(--mist-strong);font-size:16px;max-width:440px}
+
+  /* ---------- benefits ---------- */
+  .benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .benefit{background:var(--paper);border:1px solid var(--mist);border-radius:14px;padding:22px 18px;transition:border-color .2s ease,transform .2s ease}
+  .benefit:hover{border-color:var(--solar);transform:translateY(-3px)}
+  .benefit svg{width:24px;height:24px;stroke:var(--solar);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
+  .benefit h3{font-size:16px;margin-bottom:6px;line-height:1.25}
+  .benefit p{font-size:13.5px;color:var(--mist-strong);line-height:1.5}
+  @media(max-width:480px){.benefits-grid{grid-template-columns:1fr}}
+
+  /* ---------- steps ---------- */
+  .steps{display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--mist)}
+  .step:last-child{border-bottom:none}
+  .step .n{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--solar);letter-spacing:.1em;flex-shrink:0;width:28px;padding-top:3px}
+  .step h3{font-size:17px;margin-bottom:6px}
+  .step p{font-size:14.5px;color:var(--mist-strong)}
+
+  /* ---------- pourquoi (circadian) ---------- */
+  .why{background:var(--sage)}
+  .why-grid{display:grid;gap:22px}
+  .why p{font-size:15.5px;color:var(--ink)}
+  .why p + p{margin-top:14px}
+  .why strong{font-weight:600}
+  .rhythm-diagram{margin-top:24px;background:var(--paper);border-radius:14px;padding:20px;border:1px solid var(--mist)}
+  .rhythm-diagram svg{width:100%;height:90px;display:block}
+  .rhythm-labels{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mist-strong);margin-top:8px;text-transform:uppercase;letter-spacing:.05em}
+
+  /* ---------- credo ---------- */
+  .credo{background:var(--moss-deep);color:var(--paper);position:relative;overflow:hidden}
+  .credo::after{content:"";position:absolute;right:-200px;top:-160px;width:480px;height:480px;background:radial-gradient(circle,rgba(244,81,11,.16),transparent 62%);pointer-events:none}
+  .credo .quote{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(24px,6vw,34px);line-height:1.3;letter-spacing:-.01em;font-weight:500;margin:16px 0 18px;position:relative;z-index:1}
+  .credo .author{color:rgba(244,244,239,.6);font-size:14px;position:relative;z-index:1}
+  .credo .eyebrow{color:var(--solar-soft)}
+
+  /* ---------- pricing ---------- */
+  .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .price-card{background:var(--paper);border:1px solid var(--mist);border-radius:16px;padding:26px 22px;position:relative}
+  .price-card.featured{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .price-card.featured .tag{color:var(--solar-soft)}
+  .price-card.featured ul li{color:rgba(244,244,239,.8)}
+  .price-card.featured ul li::before{background:var(--solar-soft)}
+  .price-card .badge{position:absolute;top:-12px;left:24px;background:var(--solar);color:var(--paper);font-size:10.5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;padding:5px 12px;border-radius:100px;font-weight:600}
+  .price-card .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--solar);text-transform:uppercase;display:block;margin-bottom:12px}
+  .price-card .amount{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:600;line-height:1}
+  .price-card .amount small{font-size:13px;font-weight:400;color:var(--mist-strong);font-family:'Inter',sans-serif}
+  .price-card.featured .amount small{color:rgba(244,244,239,.6)}
+  .price-card ul{list-style:none;margin:18px 0 22px;padding:0}
+  .price-card ul li{font-size:13.5px;color:var(--ink);padding:6px 0 6px 18px;position:relative}
+  .price-card ul li::before{content:"";position:absolute;left:0;top:14px;width:8px;height:1px;background:var(--solar)}
+  @media(max-width:480px){.pricing-grid{grid-template-columns:1fr}}
+
+  /* ---------- faq ---------- */
+  .faq-item{border-bottom:1px solid var(--mist)}
+  .faq-item summary{padding:18px 0;font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary .icon{flex-shrink:0;width:18px;height:18px;border:1px solid var(--mist-strong);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .2s ease}
+  .faq-item[open] summary .icon{transform:rotate(45deg)}
+  .faq-item p{font-size:14.5px;color:var(--mist-strong);padding-bottom:18px;line-height:1.6}
+  .faq-more{display:inline-flex;align-items:center;gap:8px;margin-top:20px;font-size:14px;font-weight:600;color:var(--solar)}
+
+  /* ---------- final ---------- */
+  .final{text-align:center}
+  .final h2{font-size:clamp(28px,7vw,40px);margin:14px 0 16px}
+  .final p{color:var(--mist-strong);font-size:16px;max-width:420px;margin:0 auto 28px}
+
+  footer{padding:32px 0;border-top:1px solid var(--mist)}
+  .foot{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--mist-strong)}
+  .foot a{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">Cycle<span class="dot">.</span></div>
+    <a href="signup.html" class="btn">Essai gratuit</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Rythme de sommeil</span>
+    <h1>Réveille-toi <em>au bon moment</em>, pas au mauvais.</h1>
+    <p class="lead">Cycle. calcule l'heure exacte qui termine un cycle de sommeil complet — pour te réveiller léger, dans la fenêtre que tu choisis.</p>
+
+    <div class="hero-cta">
+      <a href="signup.html" class="btn">Commencer gratuitement →</a>
+      <span class="hero-sub"><b>7 jours gratuits</b>, sans carte requise · puis 2€/mois</span>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview">
+        <span class="preview-label">Mets ton réveil à</span>
+        <div class="preview-time">06:45</div>
+        <div class="preview-detail">5 cycles complets · 7h30 de sommeil</div>
+        <div class="preview-curve">
+          <svg viewBox="0 0 280 60" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:rgba(244,81,11,.3)" />
+                <stop offset="100%" style="stop-color:rgba(244,81,11,.05)" />
+              </linearGradient>
+            </defs>
+            <path d="M10,55 L64,40 L118,55 L172,40 L226,55 L270,42" stroke="rgba(244,244,239,.4)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10,55 L64,40 L118,55 L172,40 L226,55 L270,42 L270,60 L10,60 Z" fill="url(#grad)"/>
+          </svg>
+        </div>
+        <div class="preview-dots">
+          <span class="pdot"></span><span class="pdot"></span><span class="pdot"></span><span class="pdot"></span><span class="pdot final"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="benefits">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">À quoi ça sert</span>
+      <h2>Une app, un seul calcul, des nuits plus claires.</h2>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/></svg>
+        <h3>Calcul instantané</h3>
+        <p>Indique ton coucher et ta tranche de réveil, l'heure exacte s'affiche tout de suite.</p>
+      </div>
+      <div class="benefit">
+        <svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+        <h3>Cycles personnalisés</h3>
+        <p>Règle la durée de ton cycle et ton temps d'endormissement — le calcul s'adapte à toi.</p>
+      </div>
+      <div class="benefit">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg>
+        <h3>Alarme intégrée</h3>
+        <p>Un bouton suffit pour créer l'alarme correspondante directement sur ton téléphone.</p>
+      </div>
+      <div class="benefit">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+        <h3>Suivi de tes nuits</h3>
+        <p>Chaque nuit est enregistrée pour voir ta régularité évoluer dans le temps.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section id="comment">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Trois étapes</span>
+      <h2>Comment ça marche</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="n">01</span>
+        <div>
+          <h3>Indique ton heure de coucher</h3>
+          <p>L'heure à laquelle tu prévois de te mettre au lit ce soir.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <div>
+          <h3>Choisis ta tranche de réveil</h3>
+          <p>Par exemple "entre 6h et 7h30" — la plage qui te convient demain matin.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <div>
+          <h3>Cycle. trouve l'heure exacte</h3>
+          <p>Le calcul aligne ton réveil sur la fin d'un cycle complet de 90 minutes, dans ta tranche.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI LES CYCLES -->
+<section class="why" id="pourquoi">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">La science derrière</span>
+      <h2>Pourquoi l'heure de réveil change tout</h2>
+    </div>
+    <div class="why-grid">
+      <p>Pendant la nuit, ton sommeil traverse des <strong>cycles d'environ 90 minutes</strong>, qui alternent sommeil léger, sommeil profond et sommeil paradoxal (REM). Te réveiller au milieu d'un cycle profond donne cette sensation de groggy, même après une longue nuit.</p>
+      <p>En parallèle, ton <strong>cycle circadien</strong> — ton horloge interne sur 24 heures — régule ta température, ta vigilance et la sécrétion de mélatonine selon l'heure de la journée. Aligner ton réveil sur la fin d'un cycle de sommeil, dans une fenêtre cohérente avec ton rythme circadien, c'est la combinaison qui rend le réveil plus doux.</p>
+      <div class="rhythm-diagram">
+        <svg viewBox="0 0 320 90" preserveAspectRatio="none">
+          <path d="M5,20 C30,70 50,70 75,30 C100,5 120,5 145,40 C170,75 190,75 215,35 C240,5 260,5 285,30 C300,45 310,50 315,45"
+                stroke="#F4510B" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="rhythm-labels">
+          <span>Coucher</span>
+          <span>Cycles de 90 min</span>
+          <span>Réveil idéal</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREDO -->
+<section class="credo">
+  <div class="wrap">
+    <span class="eyebrow">L'approche</span>
+    <p class="quote">« Le sommeil n'est pas une pause dans la vie, c'est ce qui la rend possible. »</p>
+    <span class="author">— Raphaël Legrand, praticien Centre de l'Hormèse</span>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="tarifs">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Tarifs</span>
+      <h2>Simple, sans engagement.</h2>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <span class="tag">Découverte</span>
+        <div class="amount">0€<small> · 7 jours</small></div>
+        <ul>
+          <li>Calculateur complet</li>
+          <li>Réglages personnalisés</li>
+          <li>Alarme intégrée</li>
+          <li>Historique limité</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <span class="badge">Recommandé</span>
+        <span class="tag">Cycle Pro</span>
+        <div class="amount">2€<small> /mois</small></div>
+        <ul>
+          <li>Tout l'essai gratuit</li>
+          <li>Historique complet & stats</li>
+          <li>Suivi de régularité</li>
+          <li>Annulable à tout moment</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ PREVIEW -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Questions fréquentes</span>
+      <h2>Tout comprendre en 2 minutes</h2>
+    </div>
+
+    <details class="faq-item">
+      <summary>Pourquoi 90 minutes par cycle ?<span class="icon">+</span></summary>
+      <p>C'est la durée moyenne d'un cycle de sommeil chez l'adulte. Elle varie un peu d'une personne à l'autre, c'est pour ça que tu peux l'ajuster dans les réglages.</p>
+    </details>
+    <details class="faq-item">
+      <summary>L'app fonctionne hors-ligne ?<span class="icon">+</span></summary>
+      <p>Oui, une fois installée sur ton téléphone, le calculateur fonctionne sans connexion internet.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Je peux annuler quand je veux ?<span class="icon">+</span></summary>
+      <p>Oui, l'abonnement à 2€/mois est sans engagement. Tu peux l'annuler à tout moment depuis ton profil.</p>
+    </details>
+
+    <a href="#" class="faq-more">Voir toutes les questions dans l'app →</a>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="wrap">
+    <span class="eyebrow">Prêt·e ?</span>
+    <h2>Ta prochaine nuit commence par une heure de réveil.</h2>
+    <p>Essaie gratuitement pendant 7 jours. Aucune carte requise pour démarrer.</p>
+    <a href="signup.html" class="btn">Commencer gratuitement →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="brand">Cycle<span class="dot" style="color:var(--solar)">.</span></div>
+    <span>Une app par Raphaël Legrand · Centre de l'Hormèse</span>
+    <a href="signup.html">Créer un compte / Se connecter</a>
+  </div>
+</footer>
+
+</body>
+</html>
