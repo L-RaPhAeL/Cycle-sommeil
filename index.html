@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cycle. — Réveil idéal</title>
+<meta name="description" content="Calcule ton réveil idéal selon tes cycles de sommeil de 90 minutes.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F4EF;
+    --ink:#10180F;
+    --moss-deep:#0E2A1F;
+    --solar:#F4510B;
+    --solar-soft:#FF7A3D;
+    --mist:rgba(16,24,15,.12);
+    --mist-strong:rgba(16,24,15,.55);
+    --sage:#DCE4D4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:var(--moss-deep);color:var(--ink);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;font-weight:600}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--solar);font-weight:500}
+
+  .app{max-width:440px;margin:0 auto;min-height:100vh;background:var(--paper);position:relative;padding-bottom:78px}
+
+  /* ---------- appbar ---------- */
+  .appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 20px;background:rgba(244,244,239,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--mist)}
+  .brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px}
+  .brand .dot{color:var(--solar)}
+  .appbar-title{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mist-strong)}
+
+  /* ---------- screens ---------- */
+  .screen{padding:28px 20px 24px}
+  .tab h1{font-size:clamp(26px,7vw,32px);margin:8px 0 10px}
+  .tab .lead{color:var(--mist-strong);font-size:14.5px;margin-bottom:26px;line-height:1.6}
+
+  /* ---------- fields ---------- */
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;color:var(--mist-strong);margin-bottom:6px;font-weight:500}
+  .row{display:flex;gap:12px}
+  .row .field{flex:1}
+  input[type="time"]{width:100%;background:#fff;border:1px solid var(--mist);border-radius:10px;padding:11px 12px;color:var(--ink);font-family:'Inter',sans-serif;font-size:15px}
+  input[type="time"]:focus{outline:2px solid var(--solar);outline-offset:1px}
+
+  /* ---------- result card ---------- */
+  .result-card{margin-top:24px;background:var(--moss-deep);color:var(--paper);border-radius:18px;padding:28px 24px;text-align:center;position:relative;overflow:hidden}
+  .result-card::after{content:"";position:absolute;right:-100px;top:-110px;width:260px;height:260px;background:radial-gradient(circle,rgba(244,81,11,.22),transparent 65%);pointer-events:none}
+  .result-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,244,239,.55);position:relative;z-index:1}
+  .result-time{font-family:'Bricolage Grotesque',sans-serif;font-size:3.4rem;font-weight:600;color:var(--solar-soft);line-height:1.1;margin:6px 0;position:relative;z-index:1}
+  .result-detail{font-size:13.5px;color:rgba(244,244,239,.7);position:relative;z-index:1}
+  .cycles{display:flex;justify-content:center;gap:7px;margin:18px 0 4px;flex-wrap:wrap;position:relative;z-index:1}
+  .cycle-dot{width:11px;height:11px;border-radius:50%;background:rgba(244,244,239,.18);border:1px solid rgba(244,244,239,.4)}
+  .cycle-dot.final{background:var(--solar);border-color:var(--solar);box-shadow:0 0 0 4px rgba(244,81,11,.25)}
+  .note{font-size:12.5px;color:rgba(244,244,239,.6);margin-top:14px;line-height:1.5;position:relative;z-index:1}
+  .note strong{color:var(--paper)}
+
+  /* ---------- stats tab ---------- */
+  .stats-band{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:6px 0 28px;padding:20px 0;border-top:1px solid var(--mist);border-bottom:1px solid var(--mist)}
+  .stat{text-align:center}
+  .stat .num{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:600;color:var(--solar)}
+  .stat .lbl{font-size:11px;color:var(--mist-strong);margin-top:4px;line-height:1.3}
+
+  .chart{display:flex;align-items:flex-end;gap:8px;height:110px;margin-bottom:8px;padding:0 2px}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .bar{width:100%;background:var(--sage);border-radius:5px 5px 2px 2px}
+  .bar.best{background:var(--solar)}
+  .bar-day{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mist-strong)}
+  .chart-caption{font-size:11.5px;color:var(--mist-strong);margin-bottom:24px}
+
+  .history-list{border-top:1px solid var(--mist)}
+  .history-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--mist);gap:10px}
+  .history-day{font-size:13px;font-weight:600;width:42px;flex-shrink:0}
+  .history-time{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mist-strong);flex:1;text-align:center}
+  .history-meta{text-align:right;flex-shrink:0}
+  .history-dur{font-size:13px;font-weight:600}
+  .history-cycles{font-size:10.5px;color:var(--mist-strong)}
+
+  /* ---------- profil tab ---------- */
+  .setting-group{border-top:1px solid var(--mist)}
+  .setting{display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1px solid var(--mist);gap:16px}
+  .setting-label{display:block;font-size:14.5px;font-weight:600}
+  .setting-desc{display:block;font-size:12px;color:var(--mist-strong);margin-top:2px}
+
+  .stepper{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;flex-shrink:0}
+  .stepper button{width:28px;height:28px;border-radius:50%;border:1px solid var(--mist);background:#fff;font-size:16px;line-height:1;cursor:pointer;color:var(--ink)}
+  .stepper button:active{background:var(--sage)}
+  .stepper span{min-width:50px;text-align:center}
+
+  .switch{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0;position:absolute}
+  .slider{position:absolute;cursor:pointer;inset:0;background:var(--mist);border-radius:100px;transition:.2s}
+  .slider::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked + .slider{background:var(--solar)}
+  .switch input:checked + .slider::before{transform:translateX(18px)}
+
+  .about-card{margin-top:26px;background:var(--sage);border-radius:16px;padding:24px}
+  .about-card .quote{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:500;line-height:1.35;margin-bottom:12px;letter-spacing:-.01em}
+  .about-card .author{font-size:12px;color:var(--mist-strong)}
+
+  .app-info{margin-top:24px;text-align:center}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--paper);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;padding:9px 18px;border-radius:100px}
+  .badge .bdot{width:6px;height:6px;border-radius:50%;background:var(--solar)}
+  .version{font-size:11px;color:var(--mist-strong);margin-top:10px}
+
+  /* ---------- tab bar ---------- */
+  .tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;background:rgba(244,244,239,.94);backdrop-filter:blur(14px);border-top:1px solid var(--mist);padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:30}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--mist-strong);font-family:'Inter',sans-serif;font-size:10.5px;font-weight:500;padding:6px 0;cursor:pointer}
+  .tab-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tab-btn.active{color:var(--solar)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="appbar">
+    <div class="brand">Cycle<span class="dot">.</span></div>
+    <div class="appbar-title" id="tabTitle">Calculateur</div>
+  </header>
+
+  <!-- ============ TAB 1 : CALCULATEUR ============ -->
+  <section class="screen tab" id="tab-calc">
+    <span class="eyebrow">Rythme de sommeil</span>
+    <h1>Ton réveil idéal</h1>
+    <p class="lead">Calculé sur tes cycles de sommeil et ton temps d'endormissement, réglables dans Profil.</p>
+
+    <div class="field">
+      <label for="bedtime">Heure du coucher</label>
+      <input type="time" id="bedtime" value="23:00">
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="wakeStart">Réveil au plus tôt</label>
+        <input type="time" id="wakeStart" value="06:00">
+      </div>
+      <div class="field">
+        <label for="wakeEnd">Réveil au plus tard</label>
+        <input type="time" id="wakeEnd" value="07:30">
+      </div>
+    </div>
+
+    <div class="result-card">
+      <span class="result-label">Mets ton réveil à</span>
+      <div class="result-time" id="resultTime">--:--</div>
+      <div class="result-detail" id="resultDetail"></div>
+      <div class="cycles" id="cycles"></div>
+      <p class="note" id="note"></p>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2 : STATS / HISTORIQUE ============ -->
+  <section class="screen tab" id="tab-stats" hidden>
+    <span class="eyebrow">Cette semaine</span>
+    <h1>Ton historique</h1>
+    <p class="lead">Un aperçu de tes sept dernières nuits.</p>
+
+    <div class="stats-band">
+      <div class="stat"><div class="num" id="statAvgDur">—</div><div class="lbl">Durée moyenne</div></div>
+      <div class="stat"><div class="num" id="statAvgCycles">—</div><div class="lbl">Cycles moyens</div></div>
+      <div class="stat"><div class="num" id="statReg">—</div><div class="lbl">Régularité</div></div>
+    </div>
+
+    <div class="chart" id="chart"></div>
+    <p class="chart-caption">Durée de sommeil par nuit · la barre orange est ta meilleure nuit.</p>
+
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <!-- ============ TAB 3 : PROFIL / PARAMÈTRES ============ -->
+  <section class="screen tab" id="tab-profil" hidden>
+    <span class="eyebrow">Réglages</span>
+    <h1>Personnalise ton rythme</h1>
+    <p class="lead">Ces réglages s'appliquent directement au calculateur.</p>
+
+    <div class="setting-group">
+      <div class="setting">
+        <div class="setting-info">
+          <span class="setting-label">Temps d'endormissement</span>
+          <span class="setting-desc">Délai moyen avant de t'endormir</span>
+        </div>
+        <div class="stepper">
+          <button data-action="latency-down" aria-label="Diminuer">−</button>
+          <span id="latencyVal">15 min</span>
+          <button data-action="latency-up" aria-label="Augmenter">+</button>
+        </div>
+      </div>
+
+      <div class="setting">
+        <div class="setting-info">
+          <span class="setting-label">Durée d'un cycle</span>
+          <span class="setting-desc">Cycle de sommeil moyen</span>
+        </div>
+        <div class="stepper">
+          <button data-action="cycle-down" aria-label="Diminuer">−</button>
+          <span id="cycleVal">90 min</span>
+          <button data-action="cycle-up" aria-label="Augmenter">+</button>
+        </div>
+      </div>
+
+      <div class="setting">
+        <div class="setting-info">
+          <span class="setting-label">Rappel coucher</span>
+          <span class="setting-desc">Notification 30 min avant ton coucher</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="reminderToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <p class="quote">« Le sommeil n'est pas une pause dans la vie, c'est ce qui la rend possible. »</p>
+      <span class="author">— Raphaël Legrand, praticien Centre de l'Hormèse</span>
+    </div>
+
+    <div class="app-info">
+      <span class="badge"><span class="bdot"></span>Cycle. — 2,00 € sur l'App Store</span>
+      <p class="version">Version 1.0</p>
+    </div>
+  </section>
+
+  <!-- ============ TAB BAR ============ -->
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="calc">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M5 3l2.5 2M19 3l-2.5 2"/></svg>
+      Calculateur
+    </button>
+    <button class="tab-btn" data-tab="stats">
+      <svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+      Stats
+    </button>
+    <button class="tab-btn" data-tab="profil">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      Profil
+    </button>
+  </nav>
+
+</div>
+
+<script>
+  /* ================= TAB SWITCHING ================= */
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabs = {
+    calc: document.getElementById('tab-calc'),
+    stats: document.getElementById('tab-stats'),
+    profil: document.getElementById('tab-profil')
+  };
+  const titles = { calc: 'Calculateur', stats: 'Historique', profil: 'Réglages' };
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(tabs).forEach(t => t.hidden = true);
+      tabs[btn.dataset.tab].hidden = false;
+      document.getElementById('tabTitle').textContent = titles[btn.dataset.tab];
+    });
+  });
+
+  /* ================= SETTINGS ================= */
+  const settings = { latency: 15, cycle: 90 };
+
+  const latencyVal = document.getElementById('latencyVal');
+  const cycleVal = document.getElementById('cycleVal');
+
+  document.querySelector('[data-action="latency-down"]').addEventListener('click', () => {
+    settings.latency = Math.max(0, settings.latency - 5);
+    latencyVal.textContent = settings.latency + ' min';
+    calculate();
+  });
+  document.querySelector('[data-action="latency-up"]').addEventListener('click', () => {
+    settings.latency = Math.min(45, settings.latency + 5);
+    latencyVal.textContent = settings.latency + ' min';
+    calculate();
+  });
+  document.querySelector('[data-action="cycle-down"]').addEventListener('click', () => {
+    settings.cycle = Math.max(60, settings.cycle - 5);
+    cycleVal.textContent = settings.cycle + ' min';
+    calculate();
+  });
+  document.querySelector('[data-action="cycle-up"]').addEventListener('click', () => {
+    settings.cycle = Math.min(120, settings.cycle + 5);
+    cycleVal.textContent = settings.cycle + ' min';
+    calculate();
+  });
+
+  /* ================= CALCULATEUR ================= */
+  const bedtimeEl = document.getElementById('bedtime');
+  const wakeStartEl = document.getElementById('wakeStart');
+  const wakeEndEl = document.getElementById('wakeEnd');
+  const resultTime = document.getElementById('resultTime');
+  const resultDetail = document.getElementById('resultDetail');
+  const cyclesEl = document.getElementById('cycles');
+  const noteEl = document.getElementById('note');
+
+  function toMinutes(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+  function toTimeStr(mins) {
+    mins = ((mins % 1440) + 1440) % 1440;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+  function durationStr(totalMin) {
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+  }
+
+  function calculate() {
+    const bed = toMinutes(bedtimeEl.value);
+    let wStart = toMinutes(wakeStartEl.value);
+    let wEnd = toMinutes(wakeEndEl.value);
+    const fallAsleep = bed + settings.latency;
+
+    while (wStart <= fallAsleep) { wStart += 1440; wEnd += 1440; }
+    if (wEnd < wStart) wEnd += 1440;
+
+    const candidates = [];
+    for (let n = 1; n <= 8; n++) {
+      const wake = fallAsleep + n * settings.cycle;
+      candidates.push({ n, wake, inRange: wake >= wStart && wake <= wEnd });
+    }
+
+    const inRange = candidates.filter(c => c.inRange);
+    let best, outside = false;
+
+    if (inRange.length) {
+      best = inRange.reduce((a, b) =>
+        Math.abs(b.n - 5.5) < Math.abs(a.n - 5.5) ? b : a
+      );
+    } else {
+      outside = true;
+      best = candidates.reduce((a, b) => {
+        const da = a.wake < wStart ? wStart - a.wake : a.wake - wEnd;
+        const db = b.wake < wStart ? wStart - b.wake : b.wake - wEnd;
+        return db < da ? b : a;
+      });
+    }
+
+    resultTime.textContent = toTimeStr(best.wake);
+    resultDetail.textContent =
+      `${best.n} cycle${best.n > 1 ? 's' : ''} complet${best.n > 1 ? 's' : ''} · ${durationStr(best.n * settings.cycle)} de sommeil`;
+
+    cyclesEl.innerHTML = '';
+    for (let i = 1; i <= best.n; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'cycle-dot' + (i === best.n ? ' final' : '');
+      cyclesEl.appendChild(dot);
+    }
+
+    if (outside) {
+      const diff = best.wake < wStart ? wStart - best.wake : best.wake - wEnd;
+      const dir = best.wake < wStart ? 'avant' : 'après';
+      noteEl.innerHTML = `Aucun cycle complet ne tombe dans ta tranche. L'option la plus proche est <strong>${toTimeStr(best.wake)}</strong> (${diff} min ${dir} ta tranche).`;
+    } else {
+      const alts = inRange.filter(c => c !== best).map(c => `${toTimeStr(c.wake)} (${c.n} cycles)`);
+      noteEl.innerHTML = alts.length ? `Autre option dans ta tranche : <strong>${alts.join(', ')}</strong>.` : '';
+    }
+  }
+
+  [bedtimeEl, wakeStartEl, wakeEndEl].forEach(el => el.addEventListener('input', calculate));
+  calculate();
+
+  /* ================= STATS / HISTORIQUE ================= */
+  const history = [
+    { day: 'Lun', bed: '23:15', wake: '06:45', dur: 465, cycles: 5 },
+    { day: 'Mar', bed: '23:40', wake: '07:25', dur: 465, cycles: 5 },
+    { day: 'Mer', bed: '00:10', wake: '06:25', dur: 375, cycles: 4 },
+    { day: 'Jeu', bed: '22:50', wake: '06:35', dur: 465, cycles: 5 },
+    { day: 'Ven', bed: '23:30', wake: '07:15', dur: 465, cycles: 5 },
+    { day: 'Sam', bed: '00:20', wake: '09:35', dur: 555, cycles: 6 },
+    { day: 'Dim', bed: '23:05', wake: '06:50', dur: 465, cycles: 5 }
+  ];
+
+  const totalDur = history.reduce((s, h) => s + h.dur, 0);
+  const avgDur = Math.round(totalDur / history.length);
+  const avgCycles = (history.reduce((s, h) => s + h.cycles, 0) / history.length).toFixed(1);
+  const regularNights = history.filter(h => h.cycles === 5).length;
+  const regularity = Math.round((regularNights / history.length) * 100);
+
+  document.getElementById('statAvgDur').textContent = durationStr(avgDur);
+  document.getElementById('statAvgCycles').textContent = avgCycles;
+  document.getElementById('statReg').textContent = regularity + '%';
+
+  const maxDur = Math.max(...history.map(h => h.dur));
+  const chartEl = document.getElementById('chart');
+  history.forEach(h => {
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (h.dur === maxDur ? ' best' : '');
+    bar.style.height = Math.max(8, (h.dur / maxDur) * 100) + '%';
+    const label = document.createElement('div');
+    label.className = 'bar-day';
+    label.textContent = h.day;
+    wrap.appendChild(bar);
+    wrap.appendChild(label);
+    chartEl.appendChild(wrap);
+  });
+
+  const historyListEl = document.getElementById('historyList');
+  history.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    row.innerHTML = `
+      <span class="history-day">${h.day}</span>
+      <span class="history-time">${h.bed} → ${h.wake}</span>
+      <span class="history-meta">
+        <span class="history-dur">${durationStr(h.dur)}</span><br>
+        <span class="history-cycles">${h.cycles} cycles</span>
+      </span>`;
+    historyListEl.appendChild(row);
+  });
+
+  /* ================= PWA SERVICE WORKER ================= */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
